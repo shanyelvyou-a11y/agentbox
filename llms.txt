@@ -1,0 +1,20 @@
+# AgentBox
+
+> Email inboxes for AI agents: create an inbox via API or MCP, receive mail with verification codes and confirmation links extracted as structured JSON, get notified by webhook or long-poll. Receive-only, running on Cloudflare Workers + KV.
+
+## Docs
+
+- [Install & integration guide (install.md)](https://agentbox.example.com/install.md): Full machine-readable guide — quickstart, MCP client config, self-check script, troubleshooting, hard limits. Read this first.
+- [Health check](https://agentbox.example.com/health): Live status: {"ok": true, service, domain, inbox count}.
+
+## API summary
+
+- Base URL: https://agentbox.example.com
+- Receiving domain: mail.example.com
+- REST: POST /inboxes (admin Bearer token) creates an inbox and returns address, api_key, webhook_secret (shown once only). GET /inboxes/{address}/messages, GET /inboxes/{address}/messages/{id}, GET /inboxes/{address}/wait?timeout&after (per-inbox API key as Bearer token).
+- MCP: POST /mcp — stateless Streamable HTTP, JSON-RPC 2.0. Tools: create_inbox (admin token), list_messages, get_message, wait_for_message (per-inbox API key in the Authorization header).
+- Webhooks: optional per-inbox callback on new mail, signed with HMAC-SHA256 using the per-inbox webhook_secret.
+
+## Limits
+
+- Receive-only (no sending). 500 messages per inbox per day. Attachments stored as metadata only. Inbox cap MAX_INBOXES (default 200); each inbox uses one Cloudflare Email Routing literal rule, and rules are capped at 200 per zone. Storage is eventually consistent (re-read after ~10 seconds).

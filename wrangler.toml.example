@@ -1,0 +1,35 @@
+# AgentBox — example configuration. Copy to wrangler.toml and fill in your values:
+#   cp wrangler.toml.example wrangler.toml
+#
+# - name: the Cloudflare Worker name. Keep "agent-mail" unless you also update
+#   the worker name hard-coded in src/index.js (cfCreateRule sends routing
+#   rules to the Worker named "agent-mail").
+# - KV id: create a namespace with `wrangler kv namespace create agentbox`
+#   and paste its id below.
+# - DOMAIN: the domain (or subdomain) whose mail this Worker receives,
+#   e.g. mail.example.com. It must be on the same Cloudflare zone and have
+#   Email Routing enabled.
+# - CF_ZONE_ID: the Zone ID of that domain's zone (Cloudflare dashboard ->
+#   your domain -> Overview -> API section).
+name = "agent-mail"
+main = "src/index.js"
+compatibility_date = "2025-06-04"
+
+[observability]
+enabled = true
+
+[[kv_namespaces]]
+binding = "KV"
+id = "YOUR_KV_NAMESPACE_ID"
+
+[vars]
+DOMAIN = "mail.example.com"
+CF_ZONE_ID = "YOUR_ZONE_ID"
+# Inbox capacity soft cap. Note the platform ceiling behind it: Cloudflare
+# Email Routing allows 200 rules per zone, shared with every other rule in
+# the zone, and each inbox consumes one literal rule. 150 leaves headroom
+# for other systems on the same zone. Create returns 429 past the cap.
+MAX_INBOXES = "150"
+# Secrets are NOT set here. Set them with wrangler (see README "Quick start"):
+#   wrangler secret put ADMIN_TOKEN
+#   wrangler secret put CF_API_TOKEN
